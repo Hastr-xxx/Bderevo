@@ -376,13 +376,12 @@ class Program
     class MeasurementResult
     {
         public int Index { get; set; }
-        public long TimeTicks { get; set; }
+        public double TimeMilliseconds { get; set; }
         public int OperationCount { get; set; }
     }
 
     static void Main(string[] args)
     {
-        Console.WriteLine("B-дерево: Тестирование операций...");
 
         BTree bTree = new BTree(3);
 
@@ -400,7 +399,6 @@ class Program
 
         Stopwatch sw = new Stopwatch();
 
-        Console.WriteLine("Добавление 10000 элементов...");
         for (int i = 0; i < randomNumbers.Length; i++)
         {
             sw.Restart();
@@ -410,12 +408,10 @@ class Program
             insertResults.Add(new MeasurementResult
             {
                 Index = i,
-                TimeTicks = sw.ElapsedTicks,
+                TimeMilliseconds = sw.Elapsed.TotalMilliseconds,
                 OperationCount = bTree.OperationCount
             });
         }
-
-        Console.WriteLine("Поиск 100 случайных элементов...");
         var searchIndices = Enumerable.Range(0, arraySize).OrderBy(x => rand.Next()).Take(100).ToList();
         foreach (int idx in searchIndices)
         {
@@ -426,12 +422,11 @@ class Program
             searchResults.Add(new MeasurementResult
             {
                 Index = idx,
-                TimeTicks = sw.ElapsedTicks,
+                TimeMilliseconds = sw.Elapsed.TotalMilliseconds,
                 OperationCount = bTree.OperationCount
             });
         }
 
-        Console.WriteLine("Удаление 1000 случайных элементов...");
         var deleteIndices = Enumerable.Range(0, arraySize).OrderBy(x => rand.Next()).Take(1000).ToList();
         foreach (int idx in deleteIndices)
         {
@@ -442,28 +437,18 @@ class Program
             deleteResults.Add(new MeasurementResult
             {
                 Index = idx,
-                TimeTicks = sw.ElapsedTicks,
+                TimeMilliseconds = sw.Elapsed.TotalMilliseconds,
                 OperationCount = bTree.OperationCount
             });
         }
 
-        Console.WriteLine("Сохранение результатов в CSV файлы...");
-        SaveResultsToCsv(insertResults, "insert_results.csv", "Index,TimeTicks,OperationCount");
-        SaveResultsToCsv(searchResults, "search_results.csv", "Index,TimeTicks,OperationCount");
-        SaveResultsToCsv(deleteResults, "delete_results.csv", "Index,TimeTicks,OperationCount");
-
-        Console.WriteLine("\n--- Сводка ---");
-        Console.WriteLine($"Добавлено элементов: {insertResults.Count}");
-        Console.WriteLine($"Найдено элементов: {searchResults.Count}");
-        Console.WriteLine($"Удалено элементов: {deleteResults.Count}");
-        Console.WriteLine($"Среднее время добавления (тики): {insertResults.Average(r => r.TimeTicks):F2}");
-        Console.WriteLine($"Среднее время поиска (тики): {searchResults.Average(r => r.TimeTicks):F2}");
-        Console.WriteLine($"Среднее время удаления (тики): {deleteResults.Average(r => r.TimeTicks):F2}");
+        Console.WriteLine($"Среднее время добавления (мс): {insertResults.Average(r => r.TimeMilliseconds):F4}");
+        Console.WriteLine($"Среднее время поиска (мс): {searchResults.Average(r => r.TimeMilliseconds):F4}");
+        Console.WriteLine($"Среднее время удаления (мс): {deleteResults.Average(r => r.TimeMilliseconds):F4}");
         Console.WriteLine($"Среднее кол-во операций добавления: {insertResults.Average(r => r.OperationCount):F2}");
         Console.WriteLine($"Среднее кол-во операций поиска: {searchResults.Average(r => r.OperationCount):F2}");
         Console.WriteLine($"Среднее кол-во операций удаления: {deleteResults.Average(r => r.OperationCount):F2}");
 
-        Console.WriteLine("\nГотово. Нажмите любую клавишу для выхода.");
         Console.ReadKey();
     }
 
@@ -476,14 +461,10 @@ class Program
                 sw.WriteLine(header);
                 foreach (var res in results)
                 {
-                    sw.WriteLine($"{res.Index},{res.TimeTicks},{res.OperationCount}");
+                    sw.WriteLine($"{res.Index},{res.TimeMilliseconds:F4},{res.OperationCount}");
                 }
             }
-            Console.WriteLine($"Файл {fileName} успешно сохранен.");
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Ошибка при сохранении файла {fileName}: {ex.Message}");
-        }
+        catch (Exception ex) { }
     }
 }
